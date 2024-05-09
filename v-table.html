@@ -1,0 +1,815 @@
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style type="text/css">
+
+
+        /* Pivot table styles */
+        .pivot-table .pivotGrid {
+            position: relative;
+        }
+
+        .pivot-table .pivotGrid>div {
+            display: flex;
+            position: absolute;
+            box-sizing: border-box;
+            border-right: 1px solid #d0d7de;
+            border-bottom: 1px solid #d0d7de;
+        }
+
+        .pivot-table .pivotView {
+            flex: 1;
+            overflow: auto;
+            border: 1px solid #d0d7de;
+        }
+
+        /* Custom cell styles */
+        .pivot-table .cell {
+            flex: 1;
+            display: flex;
+            margin: 4px;
+            border-radius: 6px;
+        }
+
+        .pivot-table .pivotGrid .cell {
+            font-size: 12px;
+            line-height: 24px;
+        }
+        .pivot-table .table-head .cell {
+             margin: 0px;
+             margin-left: 4px;
+        }
+
+        .pivot-table .table-head>div:first-of-type {
+             border-left: 0px;
+        }
+        .pivot-table .table-head>div:last-of-type {
+             border-right: 1px solid #d0d7de;
+        }
+
+        .pivot-table .pivotGrid [col="0"]{
+            border-left: 0px;
+        }
+
+        .pivot-table .pivotGrid .cell:hover {
+            background: rgb(255, 248, 215);
+        }
+
+        .pivot-table .cell-boolean>input {
+            flex: 1;
+            align-self: center;
+        }
+
+        .pivot-table .cell-dimension {
+            justify-content: flex-end;
+            overflow: hidden;
+        }
+
+        .pivot-table .cell-dimension>span {
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 80%;
+            border-radius: 6rem;
+        }
+
+        .pivot-table .cell-dimension>span[data-color="0"] {
+            background-color: #EDEEFD;
+            color: #3943D6;
+        }
+
+        .pivot-table .cell-dimension>span[data-color="1"] {
+            background-color: #DBFAF0;
+            color: #1D5946;
+        }
+
+        .pivot-table .cell-dimension>span[data-color="2"] {
+            background-color: #B6E1E0;
+            color: #235548;
+        }
+
+        .pivot-table .cell-dimension>span[data-color="3"] {
+            background-color: #C8CEED;
+            color: #252C89;
+        }
+
+        .pivot-table .cell-dimension>span[data-color="4"] {
+            background-color: #D1C0E8;
+            color: #300091;
+        }
+
+        .pivot-table .cell-dimension>span[data-color="5"] {
+            background-color: #C2DFFA;
+            color: #1E4DA2;
+        }
+
+        .pivot-table .cell-dimension>span[data-color="6"] {
+            background-color: #D3E1EE;
+            color: #113776;
+        }
+
+        .pivot-table .cell-dimension>span[data-color="7"] {
+            background-color: #D8DCE8;
+            color: #1F2451;
+        }
+
+        .pivot-table .cell-plain>input {
+            flex: 1;
+            padding: 2px 4px;
+        }
+
+        .pivot-table .cell-plain>span {
+            flex: 1;
+            display: flex;
+            justify-content: flex-end;
+            align-self: center;
+            padding: 0 4px;
+        }
+        .pivot-table .row-number {
+            width: 60px;
+            background-color: #3943D6;
+        }
+        .pivot-table .pivotView{
+            display: flex;
+            flex-direction: row;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+        .pivot-table .table-main{
+            position: relative;
+            padding-top: 34px;
+        }
+        .pivot-table .table-head {
+            /* display: flex; */
+            box-sizing: border-box;
+            border-right: 0px solid #d0d7de;
+            border-top: 0px solid #d0d7de;
+            border-bottom: 1px solid #d0d7de;
+            position:absolute;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            height: 34px;
+            background: #f6f8fa;
+            color: black;
+            z-index: 19850910;
+            text-align:left;
+            font-size: 12px;
+            line-height: 34px;
+            font-weight:600;
+        }
+        .pivot-table .table-head>div {
+            border-right: 1px solid #d0d7de;
+            border-top: 0px solid #d0d7de;
+            box-sizing: border-box;
+            overflow: hidden;
+            position:absolute;
+            /* border-bottom: 1px solid #d0d7de; */
+        }
+        .pivot-table .pivot-rownumber{
+            width: 60px;
+            min-width: 60px;
+            left: 0px;
+            top:0px;
+            bottom: 0px;
+            display: flex;
+            border-left: 1px solid #d0d7de;
+            border-top: 1px solid #d0d7de;
+            border-bottom: 1px solid #d0d7de;
+            overflow: hidden;
+            padding-top: 34px;
+            position: relative;
+            font-size: 12px;
+            font-weight:600;
+            line-height: 34px;
+            border-top-left-radius:5px ;
+            border-bottom-left-radius: 5px;
+        }
+        .pivot-table{
+            display: flex;
+            flex-direction: row;
+        }
+        .pivot-table .pivot-rownumber-row{
+            /* background-color: #f6f8fa; */
+            color: black;
+            position: relative;
+            flex-grow: 1;
+            background-color:#f6f8fa ;
+            z-index: 1985;
+        }
+
+        .pivot-table .pivot-rownumber-row>div{
+            border-bottom: 1px solid #d0d7de;
+            box-sizing: border-box;
+            position: absolute;
+        }
+
+        .pivot-table .row-rownumber-title{
+            height: 33px;
+            text-align:center;
+            line-height: 33px;
+            position: absolute;
+            top: 0px;
+            left: 0px;
+            right: 0px;
+            z-index: 19850910;
+            border-bottom: 1px solid #d0d7de;
+            background-color: white;
+        }
+        .pivot-table .rownum {
+            height: 34px;
+            text-align:center;
+            line-height: 34px;
+
+        }
+    </style>
+    <script>
+        /**
+         * 虚拟化表格，支持纵向，横向
+         * @param {any} csvData  //数据  [['Column 1', 'Column 2', 'Column 3', 'Column 4'],['1-1', '1-2', '1-3', '1-4']]
+         * @param {any} el    //表格容器
+         */
+        function virtualizedTable(config) {
+
+      
+            let defaultConfig={
+                width:800,
+                height:500,
+                cellHeight:34,
+                rowHeight:120
+            };
+
+            var result=Object.assign({},defaultConfig,config);
+
+            let {el,csvData,width,height,cellHeight,rowHeight}=result;
+
+            this.cols = csvData[0];//列头数据第一行
+
+            this.el = el;//表格容器
+            
+            this.container = document.getElementById(el);
+
+            this.pivotData={};
+
+            this.csvData=csvData;
+            //滚动容器
+            this.pivotViewId = `${this.el}_pivotView`;
+
+            this.pivotViewEle = document.getElementById(this.pivotViewId);
+
+            //表格体
+            this.pivotGridId = `${this.el}_pivotGrid`;
+
+
+            this.pivotGridEle = document.getElementById(this.pivotGridId);
+
+            //头部
+            this.pivotHeadId = `${this.el}_table-head`;
+
+            this.pivotHeadEle = document.getElementById(this.pivotHeadId);
+            
+            //序号
+            this.rownumberId = `${this.el}_pivot-rownumber-row`;
+
+            this.rownumberEle = document.getElementById(this.rownumberId);
+
+            var _self=this;
+
+            let _width=rowHeight;
+
+            let _height=cellHeight;
+
+            //生成容器
+            function createElement(){
+
+                var eleHtml = `<div class="pivot-table" style="height: ${height}px;">
+                    <div class="pivot-rownumber">
+                        <div class="row-rownumber-title">
+                            序号
+                        </div>
+                        <div  class="pivot-rownumber-row" id="${this.rownumberId}">
+
+                        </div>
+                    </div>
+                
+                    <div id="${this.pivotViewId}" class="pivotView">
+                        <div class="table-main" style="height: ${height}px;">
+                            <div class="table-head" id="${this.pivotHeadId}" style="width: 100%;">
+
+                            </div>
+                            <div  id="${this.pivotGridId}"  class="pivotGrid"></div>
+                        </div>
+                    </div>
+                </div>`;
+
+                
+
+                this.container.innerHTML = eleHtml;
+
+
+               
+                this.pivotViewEle = document.getElementById(this.pivotViewId);
+
+                //表格体
+                this.pivotGridEle = document.getElementById(this.pivotGridId);
+
+                //头部
+                this.pivotHeadEle = document.getElementById(this.pivotHeadId);
+
+                //序号
+
+                this.rownumberEle = document.getElementById(this.rownumberId);
+
+                console.info(this.pivotGridEle);
+
+            }
+            
+
+            createElement.call(this)
+
+            //生成数据()
+            function createTableData(csvData){
+
+                this.csvData=csvData;
+                this.cols = csvData[0];//列头数据第一行
+
+                this.pivotData={};
+
+                var pivot1=[];
+
+                for (let index = 0; index < this.cols.length; index++) {
+
+                    pivot1.push({label:this.cols[index],width:_width});
+
+                }
+                this.pivotData.pivot1=pivot1;
+
+                var pivot2=[]
+
+                for (let index = 1; index < csvData.length; index++) {
+                    
+                    pivot2.push({label:index+"#",height:_height})
+                }
+
+                this.pivotData.pivot2=pivot2;
+
+                var data=[]
+
+                var tempCsvData=csvData.slice(1);
+
+                //先行(i)后列(j)
+                for (let i = 0; i < tempCsvData.length; i++) {
+                   
+                    for (let j =0; j < this.pivotData.pivot1.length; j++) {
+
+                        var colLen=this.pivotData.pivot1.length;
+
+                        let index=i*colLen+j;//格子数
+                      
+                        data.push({value:tempCsvData[i][j],constructor:createPlainText,col:j,row:i+1})
+                    }
+                }
+
+                this.pivotData.data=data;
+
+            }
+
+
+            createTableData.call(this,this.csvData);
+
+         
+
+            function binarySearch(array, value) {
+					return binarySearchRecurse(array, value, 0, array.length);
+				}
+
+				function binarySearchRecurse(array, value, start, stop) {
+					if (start + 1 >= stop) {
+						return start;
+					}
+
+					let middle = Math.floor((start + stop) / 2);
+
+					if (array[middle] > value) {
+						return binarySearchRecurse(array, value, start, middle);
+					} else {
+						return binarySearchRecurse(array, value, middle, stop);
+					}
+				}
+
+				// Cell rendering functions by type
+				function createBooleanValue(initial, update) {
+					let checkbox = document.createElement('input');
+
+					checkbox.addEventListener('change', (e) => update(checkbox.checked));
+					checkbox.checked = initial;
+					checkbox.type = 'checkbox';
+
+					let container = document.createElement('div');
+
+					container.appendChild(checkbox);
+					container.className = 'cell cell-boolean';
+
+					return container;
+				}
+
+				function createDimensionValue(initial, update) {
+					let chip = document.createElement('span');
+
+					chip.dataset.color = Array.from(initial).reduce((a, c) => a * 31 + c.charCodeAt(0), 0) % 8; // Basic pseudo-hash to get deterministic color palette indices
+					chip.innerText = initial;
+
+					let container = document.createElement('div');
+
+					container.appendChild(chip);
+					container.className = 'cell cell-dimension';
+
+					return container;
+				}
+
+                function createPlainText(initial, update,rowData) {
+					let chip = document.createElement('span');
+
+					
+					chip.innerText = initial;
+
+					let container = document.createElement('div');
+
+					container.appendChild(chip);
+					container.className = 'cell cell-text cell-col-'+rowData.col+" "+" cell-row-"+rowData.row;
+
+					return container;
+				}
+
+				function createPlainValue(initial, update) {
+					let container = document.createElement('div');
+
+					container.className = 'cell cell-plain';
+
+					function createDisplay(value) {
+						let element = document.createElement('span');
+
+						element.innerText = value;
+						element.addEventListener('dblclick', () => replaceWith(createInput(value)));
+
+						return element;
+					}
+
+					function createInput(value) {
+						let element = document.createElement('input');
+
+						element.value = value;
+						element.addEventListener('keyup', (e) => {
+							if (e.key === 'Enter' || e.key === 'Escape') {
+								if (e.key === 'Enter') {
+									update(element.value);
+								}
+
+								replaceWith(createDisplay(element.value));
+
+								return false;
+							}
+						});
+
+						return element;
+					}
+
+					function replaceWith(element) {
+						if (container.firstElementChild) {
+							container.removeChild(container.firstElementChild);
+						}
+
+						container.appendChild(element);
+					}
+
+					replaceWith(createDisplay(initial));
+
+					return container;
+				}
+                
+                // Pivot table definition
+				function pivotCreate(view, grid, table) {
+             
+                    // Initialize binary search arrays with pivot top-left corner locations
+                    let xOffsets = [];
+                    let x = 0;
+                    let yOffsets = [];
+                    let y = 0;
+
+                    for (let i = 0; i < table.pivot1.length; ++i) {
+                        xOffsets[i] = x;
+                        x += table.pivot1[i].width;
+                    }
+
+                    for (let i = 0; i < table.pivot2.length; ++i) {
+                        yOffsets[i] = y;
+                        y += table.pivot2[i].height;
+                    }
+
+                   
+                    // Clear and resize grid
+                    for (let child = grid.lastElementChild; child; child = grid.lastElementChild) {
+                        grid.removeChild(child);
+                    }
+
+                    grid.style.width = table.pivot1.reduce((a, p) => a + p.width, 0)+"px";
+                    grid.style.height = table.pivot2.reduce((a, p) => a + p.height, 0)+"px";
+
+                    // Create cache and run first rendering
+                    let pivot = {
+                        cellCache: {},
+                        xOffsets: xOffsets,
+                        yOffsets: yOffsets
+                    };
+
+                    pivotRender(pivot, view, grid, table);
+
+
+                    return () => pivotRender(pivot, view, grid, table);
+                    }
+
+                function pivotRender(pivot, view, grid, table) {
+                        let iStart = binarySearch(pivot.xOffsets, view.scrollLeft);
+                        let jStart = binarySearch(pivot.yOffsets, view.scrollTop);
+
+                        if (iStart === undefined || jStart === undefined) {
+                            return;
+                        }
+
+                        let cellCacheCurrent = pivot.cellCache;
+                        let cellCacheNext = {};
+                        let data = table.data;
+                        let iStop = table.pivot1.length;
+                        let jStop = table.pivot2.length;
+                        let xStart = pivot.xOffsets[iStart];
+                        let xStop = view.scrollLeft + view.clientWidth;
+                        let yStart = pivot.yOffsets[jStart];
+                        let yStop = view.scrollTop + view.clientHeight;
+
+                        for (let j = jStart, y = yStart; j < jStop && y < yStop; y += table.pivot2[j].height, j += 1) {
+                            for (let i = iStart, x = xStart; i < iStop && x < xStop; x += table.pivot1[i].width, i += 1) {
+                                let index = i + j * iStop;
+                                
+                        
+
+                                let value = data[index].value;
+                                let cell;
+
+                                if (cellCacheCurrent[index]) {
+                                    cell = cellCacheCurrent[index];
+
+                                    delete cellCacheCurrent[index];
+                                }
+                                else {
+                                    cell = document.createElement('div')
+                                
+                                    cell.appendChild(data[index].constructor(value,(v) => data[index].value = v,data[index]));
+                                    cell.style.left = x+"px";
+                                    cell.style.top = y+"px";
+                                    cell.style.height = table.pivot2[j].height + 'px';
+                                    cell.style.width = table.pivot1[i].width + 'px';
+                                    cell.setAttribute("row",data[index].row)	
+                                    cell.setAttribute("col",data[index].col)								}
+
+                                cellCacheNext[index] = cell;
+
+                                grid.appendChild(cell);
+                            }
+                        }
+
+                        // Remove stale elements from cache and return updated one
+                        for (let index in cellCacheCurrent) {
+                            grid.removeChild(cellCacheCurrent[index]);
+                        }
+
+                        pivot.cellCache = cellCacheNext;
+
+                         resizeHead.call(this);
+
+                       
+                }
+        
+
+                var scrollAction = { x: undefined, y: undefined };
+				var scrollDirection;
+                var isFirstCreate=true;
+                function scrollFunc() {
+                    if(typeof scrollAction.x == 'undefined') {
+                        scrollAction.x = _self.pivotViewEle.scrollLeft;
+                        scrollAction.y = _self.pivotViewEle.scrollTop;
+                    }
+                    var diffX = scrollAction.x - _self.pivotViewEle.scrollLeft;
+                    var diffY = scrollAction.y -  _self.pivotViewEle.scrollTop;
+                    if(diffX < 0) {
+                        // Scroll right
+                        scrollDirection = 'right';
+                    } else if(diffX > 0) {
+                        // Scroll left
+                        scrollDirection = 'left';
+                    } else if(diffY < 0) {
+                        // Scroll down
+                        scrollDirection = 'down';
+                    } else if(diffY > 0) {
+                        // Scroll up
+                        scrollDirection = 'up';
+                    } else {
+                        // First scroll event
+                    }
+                    scrollAction.x =  _self.pivotViewEle.scrollLeft;
+                    scrollAction.y =  _self.pivotViewEle.scrollTop;
+                }
+
+                function createHead(headEle,table){
+                   return;
+                    let left=0;
+					var cols=[];
+					for (let index = 0; index < Math.min(table.pivot1.length,20); index++) {
+						const element = table.pivot1[index];
+                       
+						cols.push(`<div style="left: ${left}px; top: 0px; height: ${_height}px;"><div class="cell" style="">${element.label}</div></div>`);
+                        left+=_width;
+                    }
+					headEle.innerHTML=cols.join('');
+				}
+
+				function resizeHead(){
+
+                  
+                  
+                    if(_self.pivotGridEle.childElementCount==0){
+                        return;
+                    }
+                  
+                    scrollFunc();
+
+                    var table=_self.pivotHeadEle;
+
+                    var firstChild=_self.pivotGridEle.children[0];
+
+                    var child=_self.pivotGridEle.querySelectorAll("[row='"+firstChild.getAttribute("row")+"']");
+
+                    var childCol=_self.pivotGridEle.querySelectorAll("[col='"+firstChild.getAttribute("col")+"']");
+
+					var headChild=_self.pivotHeadEle.childNodes;
+                    
+					
+                    
+                    //--------左右时,生成表头------
+                    if((scrollDirection == 'left'||scrollDirection == 'right')||isFirstCreate) {
+
+                        table.innerHTML="";
+                        
+                        for (let index = 0; index < child.length; index++) {
+
+                            const element = child[index];
+
+                            var col=element.getAttribute("col");
+
+                            var cloned=element.cloneNode(false);
+
+                            var ch=document.createElement("div");
+
+                            ch.className = 'cell cell-text';
+
+                            ch.innerText=_self.pivotData.pivot1[col].label;
+
+                            cloned.appendChild(ch);
+
+                            cloned.style.top="0px";
+
+                            cloned.setAttribute("row","0");
+
+                            table.appendChild(cloned);
+
+                        }
+
+                    }
+                    if((scrollDirection == 'up'||scrollDirection == 'down')||isFirstCreate) {
+
+                       
+                        //--------上下时,生成行号
+                      
+                    
+                        var rowBox=_self.rownumberEle;
+
+                        rowBox.innerHTML="";
+
+                        //序号
+                        for (let index = 0; index < childCol.length; index++) {
+
+                            const element = childCol[index];
+                                
+                                var col=element.getAttribute("col");
+                                var row=element.getAttribute("row");
+
+
+                                var cloned=element.cloneNode(false);
+
+                                var ch=document.createElement("div");
+
+                                ch.className = 'rownum rownum-text';
+
+                                ch.innerText=row;
+
+                                cloned.appendChild(ch);
+
+                                cloned.style.left="0px";
+
+                                cloned.style.width="100%";
+
+                                cloned.style.top=( parseFloat(element.style.top) -_self.pivotViewEle.scrollTop )+"px";
+
+                                cloned.setAttribute("col","");
+
+                                rowBox.appendChild(cloned);
+                        }
+                    }
+				
+                    isFirstCreate=false;
+                }
+
+
+                createHead(this.pivotHeadEle,this.pivotData);
+
+                
+                let render =  pivotCreate(this.pivotViewEle,this.pivotGridEle, this.pivotData);
+
+
+                this.pivotViewEle.addEventListener('scroll', () => render());
+                window.addEventListener('resize', () => {
+                   
+                    render();
+                    createHead(_self.pivotHeadEle,_self.pivotData);
+                    resizeHead();
+                });
+
+                this.pivotViewEle.addEventListener('scroll', () =>{
+
+                    var scrollTopValue =_self.pivotViewEle.scrollTop;
+            
+                    _self.pivotHeadEle.style.top=scrollTopValue+"px";
+
+                    // resizeHead();
+
+                    // debounce(resizeHead,1000);
+                });
+
+
+                function debounce(fn, wait) { 
+                    let timer = null;
+                    return function(){
+                    // wait秒内再次触发事件，只要判断timer存在，则清除上一个定时器，重新创建定时器并计算时间
+                        if(timer) clearTimeout(timer)
+                        
+                        // 判断是不是第一次点击，timer是null的时候是第一次；判断timer === null，用==也可以
+                        // 但是因为undefined  == null;一般遇到null的判断，都会把null改成boolean的判断；
+                        let firstClick = !timer;
+                        
+                        //第一次触发事件 或者 最后一次事件触发过wait秒后再次触发事件
+                        if(firsrClick) fn.apply(this,arguments);   
+                        
+                        timer = setTimeout(() => {
+                            timer = null;
+                        },wait)
+                    } 
+                }
+
+
+        }
+    
+
+        //重新加载表格数据
+        virtualizedTable.prototype.reloadData = function (csvData) {
+            this.createTableData(csvData);
+            this.pivotCreate(this.pivotViewEle,this.pivotGridEle,this.pivotData);
+        }
+
+    </script>
+</head>
+<body>
+    <div id="table-test">
+        
+    </div>
+    <script>
+
+
+        var data=[['Column 1', 'Column 2', 'Column 3', 'Column 4','Column 5', 'Column 6', 
+        'Column 7', 'Column 8','Column 9', 'Column 10', 'Column 11', 'Column 12','Column 1', 'Column 2', 'Column 3', 'Column 4','Column 5', 'Column 6', 
+        'Column 7', 'Column 8','Column 9', 'Column 10', 'Column 11', 'Column 12']];
+
+        for (let index = 0; index < 10000; index++) {
+           data.push([index+'-1', index+'-2', index+'-3', index+'-4',index+'-5',index+'-6',
+           index+'-7',index+'-8',index+'-9',index+'-10',index+'-11',index+'-12',index+'-1', index+'-2', index+'-3', index+'-4',index+'-5',index+'-6',
+           index+'-7',index+'-8',index+'-9',index+'-10',index+'-11',index+'-12']);
+        }
+
+       var tableEl= new virtualizedTable({el:"table-test",csvData:data});
+
+      
+
+    </script>
+</body>
+</html>
