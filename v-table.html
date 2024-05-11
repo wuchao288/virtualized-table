@@ -227,68 +227,69 @@
         }
     </style>
     <script>
-        /**
-         * 虚拟化表格，支持纵向，横向
-         * @param {any} csvData  //数据  [['Column 1', 'Column 2', 'Column 3', 'Column 4'],['1-1', '1-2', '1-3', '1-4']]
-         * @param {any} el    //表格容器
-         */
-        function virtualizedTable(config) {
-
-      
-            let defaultConfig={
-                width:800,
-                height:500,
-                cellHeight:34,
-                rowHeight:120
-            };
-
-            var result=Object.assign({},defaultConfig,config);
-
-            let {el,csvData,width,height,cellHeight,rowHeight}=result;
-
-            this.cols = csvData[0];//列头数据第一行
-
-            this.el = el;//表格容器
-            
-            this.container = document.getElementById(el);
-
-            this.pivotData={};
-
-            this.csvData=csvData;
-            //滚动容器
-            this.pivotViewId = `${this.el}_pivotView`;
-
-            this.pivotViewEle = document.getElementById(this.pivotViewId);
-
-            //表格体
-            this.pivotGridId = `${this.el}_pivotGrid`;
+       function virtualizedTable(config) {
 
 
-            this.pivotGridEle = document.getElementById(this.pivotGridId);
+    let defaultConfig = {
+        width: 800,
+        height: 500,
+        cellHeight: 34,
+        cellWidth: 200,
+        selectCol: [],
+        selectRow:[]
+    };
 
-            //头部
-            this.pivotHeadId = `${this.el}_table-head`;
+    var result = Object.assign({}, defaultConfig, config);
 
-            this.pivotHeadEle = document.getElementById(this.pivotHeadId);
-            
-            //序号
-            this.rownumberId = `${this.el}_pivot-rownumber-row`;
+    let { el, csvData, width, height, cellHeight, cellWidth } = result;
 
-            this.rownumberEle = document.getElementById(this.rownumberId);
+    this.cols = csvData[0];//列头数据第一行
 
-            var _self=this;
+    this.el = el;//表格容器
 
-            let _width=rowHeight;
+    this.container = document.getElementById(el);
 
-            let _height=cellHeight;
+    this.pivotData = {};
 
-            //生成容器
-            function createElement(){
+    this.selectCol = result.selectCol;//[1,2,3]//列序号 0开始
 
-                var eleHtml = `<div class="pivot-table" style="height: ${height}px;">
+    this.selectRow = result.selectRow;//[[1,23]]//开始-结束  1开始
+
+    this.csvData = csvData;
+    //滚动容器
+    this.pivotViewId = `${this.el}_pivotView`;
+
+    this.pivotViewEle = document.getElementById(this.pivotViewId);
+
+    //表格体
+    this.pivotGridId = `${this.el}_pivotGrid`;
+
+
+    this.pivotGridEle = document.getElementById(this.pivotGridId);
+
+    //头部
+    this.pivotHeadId = `${this.el}_table-head`;
+
+    this.pivotHeadEle = document.getElementById(this.pivotHeadId);
+
+    //序号
+    this.rownumberId = `${this.el}_pivot-rownumber-row`;
+
+    this.rownumberEle = document.getElementById(this.rownumberId);
+
+    var _self = this;
+
+    let _width = cellWidth;
+
+    let _height = cellHeight;
+
+    //生成容器
+    function createElement() {
+
+        var eleHtml = `<div class="pivot-table" style="height: ${height}px;">
                     <div class="pivot-rownumber">
                         <div class="row-rownumber-title">
-                            序号
+                            
                         </div>
                         <div  class="pivot-rownumber-row" id="${this.rownumberId}">
 
@@ -305,488 +306,611 @@
                     </div>
                 </div>`;
 
-                
 
-                this.container.innerHTML = eleHtml;
+        this.container.innerHTML = "";
+        this.container.innerHTML = eleHtml;
 
 
-               
-                this.pivotViewEle = document.getElementById(this.pivotViewId);
 
-                //表格体
-                this.pivotGridEle = document.getElementById(this.pivotGridId);
+        this.pivotViewEle = document.getElementById(this.pivotViewId);
 
-                //头部
-                this.pivotHeadEle = document.getElementById(this.pivotHeadId);
+        //表格体
+        this.pivotGridEle = document.getElementById(this.pivotGridId);
 
-                //序号
+        //头部
+        this.pivotHeadEle = document.getElementById(this.pivotHeadId);
 
-                this.rownumberEle = document.getElementById(this.rownumberId);
+        //序号
 
-                console.info(this.pivotGridEle);
+        this.rownumberEle = document.getElementById(this.rownumberId);
 
-            }
-            
 
-            createElement.call(this)
+    }
 
-            //生成数据()
-            function createTableData(csvData){
 
-                this.csvData=csvData;
-                this.cols = csvData[0];//列头数据第一行
+    createElement.call(this)
 
-                this.pivotData={};
+   
+    //生成数据()
+    function createTableData(csvData) {
+      
+        this.csvData = csvData;
+        this.cols = csvData[0];//列头数据第一行
 
-                var pivot1=[];
+        this.pivotData = {};
 
-                for (let index = 0; index < this.cols.length; index++) {
+        var pivot1 = [];
 
-                    pivot1.push({label:this.cols[index],width:_width});
+        for (let index = 0; index < this.cols.length; index++) {
 
-                }
-                this.pivotData.pivot1=pivot1;
-
-                var pivot2=[]
-
-                for (let index = 1; index < csvData.length; index++) {
-                    
-                    pivot2.push({label:index+"#",height:_height})
-                }
-
-                this.pivotData.pivot2=pivot2;
-
-                var data=[]
-
-                var tempCsvData=csvData.slice(1);
-
-                //先行(i)后列(j)
-                for (let i = 0; i < tempCsvData.length; i++) {
-                   
-                    for (let j =0; j < this.pivotData.pivot1.length; j++) {
-
-                        var colLen=this.pivotData.pivot1.length;
-
-                        let index=i*colLen+j;//格子数
-                      
-                        data.push({value:tempCsvData[i][j],constructor:createPlainText,col:j,row:i+1})
-                    }
-                }
-
-                this.pivotData.data=data;
-
-            }
-
-
-            createTableData.call(this,this.csvData);
-
-         
-
-            function binarySearch(array, value) {
-					return binarySearchRecurse(array, value, 0, array.length);
-				}
-
-				function binarySearchRecurse(array, value, start, stop) {
-					if (start + 1 >= stop) {
-						return start;
-					}
-
-					let middle = Math.floor((start + stop) / 2);
-
-					if (array[middle] > value) {
-						return binarySearchRecurse(array, value, start, middle);
-					} else {
-						return binarySearchRecurse(array, value, middle, stop);
-					}
-				}
-
-				// Cell rendering functions by type
-				function createBooleanValue(initial, update) {
-					let checkbox = document.createElement('input');
-
-					checkbox.addEventListener('change', (e) => update(checkbox.checked));
-					checkbox.checked = initial;
-					checkbox.type = 'checkbox';
-
-					let container = document.createElement('div');
-
-					container.appendChild(checkbox);
-					container.className = 'cell cell-boolean';
-
-					return container;
-				}
-
-				function createDimensionValue(initial, update) {
-					let chip = document.createElement('span');
-
-					chip.dataset.color = Array.from(initial).reduce((a, c) => a * 31 + c.charCodeAt(0), 0) % 8; // Basic pseudo-hash to get deterministic color palette indices
-					chip.innerText = initial;
-
-					let container = document.createElement('div');
-
-					container.appendChild(chip);
-					container.className = 'cell cell-dimension';
-
-					return container;
-				}
-
-                function createPlainText(initial, update,rowData) {
-					let chip = document.createElement('span');
-
-					
-					chip.innerText = initial;
-
-					let container = document.createElement('div');
-
-					container.appendChild(chip);
-					container.className = 'cell cell-text cell-col-'+rowData.col+" "+" cell-row-"+rowData.row;
-
-					return container;
-				}
-
-				function createPlainValue(initial, update) {
-					let container = document.createElement('div');
-
-					container.className = 'cell cell-plain';
-
-					function createDisplay(value) {
-						let element = document.createElement('span');
-
-						element.innerText = value;
-						element.addEventListener('dblclick', () => replaceWith(createInput(value)));
-
-						return element;
-					}
-
-					function createInput(value) {
-						let element = document.createElement('input');
-
-						element.value = value;
-						element.addEventListener('keyup', (e) => {
-							if (e.key === 'Enter' || e.key === 'Escape') {
-								if (e.key === 'Enter') {
-									update(element.value);
-								}
-
-								replaceWith(createDisplay(element.value));
-
-								return false;
-							}
-						});
-
-						return element;
-					}
-
-					function replaceWith(element) {
-						if (container.firstElementChild) {
-							container.removeChild(container.firstElementChild);
-						}
-
-						container.appendChild(element);
-					}
-
-					replaceWith(createDisplay(initial));
-
-					return container;
-				}
-                
-                // Pivot table definition
-				function pivotCreate(view, grid, table) {
-             
-                    // Initialize binary search arrays with pivot top-left corner locations
-                    let xOffsets = [];
-                    let x = 0;
-                    let yOffsets = [];
-                    let y = 0;
-
-                    for (let i = 0; i < table.pivot1.length; ++i) {
-                        xOffsets[i] = x;
-                        x += table.pivot1[i].width;
-                    }
-
-                    for (let i = 0; i < table.pivot2.length; ++i) {
-                        yOffsets[i] = y;
-                        y += table.pivot2[i].height;
-                    }
-
-                   
-                    // Clear and resize grid
-                    for (let child = grid.lastElementChild; child; child = grid.lastElementChild) {
-                        grid.removeChild(child);
-                    }
-
-                    grid.style.width = table.pivot1.reduce((a, p) => a + p.width, 0)+"px";
-                    grid.style.height = table.pivot2.reduce((a, p) => a + p.height, 0)+"px";
-
-                    // Create cache and run first rendering
-                    let pivot = {
-                        cellCache: {},
-                        xOffsets: xOffsets,
-                        yOffsets: yOffsets
-                    };
-
-                    pivotRender(pivot, view, grid, table);
-
-
-                    return () => pivotRender(pivot, view, grid, table);
-                    }
-
-                function pivotRender(pivot, view, grid, table) {
-                        let iStart = binarySearch(pivot.xOffsets, view.scrollLeft);
-                        let jStart = binarySearch(pivot.yOffsets, view.scrollTop);
-
-                        if (iStart === undefined || jStart === undefined) {
-                            return;
-                        }
-
-                        let cellCacheCurrent = pivot.cellCache;
-                        let cellCacheNext = {};
-                        let data = table.data;
-                        let iStop = table.pivot1.length;
-                        let jStop = table.pivot2.length;
-                        let xStart = pivot.xOffsets[iStart];
-                        let xStop = view.scrollLeft + view.clientWidth;
-                        let yStart = pivot.yOffsets[jStart];
-                        let yStop = view.scrollTop + view.clientHeight;
-
-                        for (let j = jStart, y = yStart; j < jStop && y < yStop; y += table.pivot2[j].height, j += 1) {
-                            for (let i = iStart, x = xStart; i < iStop && x < xStop; x += table.pivot1[i].width, i += 1) {
-                                let index = i + j * iStop;
-                                
-                        
-
-                                let value = data[index].value;
-                                let cell;
-
-                                if (cellCacheCurrent[index]) {
-                                    cell = cellCacheCurrent[index];
-
-                                    delete cellCacheCurrent[index];
-                                }
-                                else {
-                                    cell = document.createElement('div')
-                                
-                                    cell.appendChild(data[index].constructor(value,(v) => data[index].value = v,data[index]));
-                                    cell.style.left = x+"px";
-                                    cell.style.top = y+"px";
-                                    cell.style.height = table.pivot2[j].height + 'px';
-                                    cell.style.width = table.pivot1[i].width + 'px';
-                                    cell.setAttribute("row",data[index].row)	
-                                    cell.setAttribute("col",data[index].col)								}
-
-                                cellCacheNext[index] = cell;
-
-                                grid.appendChild(cell);
-                            }
-                        }
-
-                        // Remove stale elements from cache and return updated one
-                        for (let index in cellCacheCurrent) {
-                            grid.removeChild(cellCacheCurrent[index]);
-                        }
-
-                        pivot.cellCache = cellCacheNext;
-
-                         resizeHead.call(this);
-
-                       
-                }
-        
-
-                var scrollAction = { x: undefined, y: undefined };
-				var scrollDirection;
-                var isFirstCreate=true;
-                function scrollFunc() {
-                    if(typeof scrollAction.x == 'undefined') {
-                        scrollAction.x = _self.pivotViewEle.scrollLeft;
-                        scrollAction.y = _self.pivotViewEle.scrollTop;
-                    }
-                    var diffX = scrollAction.x - _self.pivotViewEle.scrollLeft;
-                    var diffY = scrollAction.y -  _self.pivotViewEle.scrollTop;
-                    if(diffX < 0) {
-                        // Scroll right
-                        scrollDirection = 'right';
-                    } else if(diffX > 0) {
-                        // Scroll left
-                        scrollDirection = 'left';
-                    } else if(diffY < 0) {
-                        // Scroll down
-                        scrollDirection = 'down';
-                    } else if(diffY > 0) {
-                        // Scroll up
-                        scrollDirection = 'up';
-                    } else {
-                        // First scroll event
-                    }
-                    scrollAction.x =  _self.pivotViewEle.scrollLeft;
-                    scrollAction.y =  _self.pivotViewEle.scrollTop;
-                }
-
-                function createHead(headEle,table){
-                   return;
-                    let left=0;
-					var cols=[];
-					for (let index = 0; index < Math.min(table.pivot1.length,20); index++) {
-						const element = table.pivot1[index];
-                       
-						cols.push(`<div style="left: ${left}px; top: 0px; height: ${_height}px;"><div class="cell" style="">${element.label}</div></div>`);
-                        left+=_width;
-                    }
-					headEle.innerHTML=cols.join('');
-				}
-
-				function resizeHead(){
-
-                  
-                  
-                    if(_self.pivotGridEle.childElementCount==0){
-                        return;
-                    }
-                  
-                    scrollFunc();
-
-                    var table=_self.pivotHeadEle;
-
-                    var firstChild=_self.pivotGridEle.children[0];
-
-                    var child=_self.pivotGridEle.querySelectorAll("[row='"+firstChild.getAttribute("row")+"']");
-
-                    var childCol=_self.pivotGridEle.querySelectorAll("[col='"+firstChild.getAttribute("col")+"']");
-
-					var headChild=_self.pivotHeadEle.childNodes;
-                    
-					
-                    
-                    //--------左右时,生成表头------
-                    if((scrollDirection == 'left'||scrollDirection == 'right')||isFirstCreate) {
-
-                        table.innerHTML="";
-                        
-                        for (let index = 0; index < child.length; index++) {
-
-                            const element = child[index];
-
-                            var col=element.getAttribute("col");
-
-                            var cloned=element.cloneNode(false);
-
-                            var ch=document.createElement("div");
-
-                            ch.className = 'cell cell-text';
-
-                            ch.innerText=_self.pivotData.pivot1[col].label;
-
-                            cloned.appendChild(ch);
-
-                            cloned.style.top="0px";
-
-                            cloned.setAttribute("row","0");
-
-                            table.appendChild(cloned);
-
-                        }
-
-                    }
-                    if((scrollDirection == 'up'||scrollDirection == 'down')||isFirstCreate) {
-
-                       
-                        //--------上下时,生成行号
-                      
-                    
-                        var rowBox=_self.rownumberEle;
-
-                        rowBox.innerHTML="";
-
-                        //序号
-                        for (let index = 0; index < childCol.length; index++) {
-
-                            const element = childCol[index];
-                                
-                                var col=element.getAttribute("col");
-                                var row=element.getAttribute("row");
-
-
-                                var cloned=element.cloneNode(false);
-
-                                var ch=document.createElement("div");
-
-                                ch.className = 'rownum rownum-text';
-
-                                ch.innerText=row;
-
-                                cloned.appendChild(ch);
-
-                                cloned.style.left="0px";
-
-                                cloned.style.width="100%";
-
-                                cloned.style.top=( parseFloat(element.style.top) -_self.pivotViewEle.scrollTop )+"px";
-
-                                cloned.setAttribute("col","");
-
-                                rowBox.appendChild(cloned);
-                        }
-                    }
-				
-                    isFirstCreate=false;
-                }
-
-
-                createHead(this.pivotHeadEle,this.pivotData);
-
-                
-                let render =  pivotCreate(this.pivotViewEle,this.pivotGridEle, this.pivotData);
-
-
-                this.pivotViewEle.addEventListener('scroll', () => render());
-                window.addEventListener('resize', () => {
-                   
-                    render();
-                    createHead(_self.pivotHeadEle,_self.pivotData);
-                    resizeHead();
-                });
-
-                this.pivotViewEle.addEventListener('scroll', () =>{
-
-                    var scrollTopValue =_self.pivotViewEle.scrollTop;
-            
-                    _self.pivotHeadEle.style.top=scrollTopValue+"px";
-
-                    // resizeHead();
-
-                    // debounce(resizeHead,1000);
-                });
-
-
-                function debounce(fn, wait) { 
-                    let timer = null;
-                    return function(){
-                    // wait秒内再次触发事件，只要判断timer存在，则清除上一个定时器，重新创建定时器并计算时间
-                        if(timer) clearTimeout(timer)
-                        
-                        // 判断是不是第一次点击，timer是null的时候是第一次；判断timer === null，用==也可以
-                        // 但是因为undefined  == null;一般遇到null的判断，都会把null改成boolean的判断；
-                        let firstClick = !timer;
-                        
-                        //第一次触发事件 或者 最后一次事件触发过wait秒后再次触发事件
-                        if(firsrClick) fn.apply(this,arguments);   
-                        
-                        timer = setTimeout(() => {
-                            timer = null;
-                        },wait)
-                    } 
-                }
-
+            pivot1.push({ label: this.cols[index], width: _width });
 
         }
+        this.pivotData.pivot1 = pivot1;
+
+        var pivot2 = []
+
+        for (let index = 1; index < csvData.length; index++) {
+
+            pivot2.push({ label: "#" + index, height: _height })
+        }
+
+        this.pivotData.pivot2 = pivot2;
+
+        var data = []
+
+        var tempCsvData = csvData.slice(1);
+
+        //先行(i)后列(j)
+        for (let i = 0; i < tempCsvData.length; i++) {
+
+            for (let j = 0; j < this.pivotData.pivot1.length; j++) {
+
+                data.push({ value: tempCsvData[i][j], constructor: createPlainText, col: j, row: i + 1 });
+            }
+        }
+
+        this.pivotData.data = data;
+
+    }
+
+    this.createTableData = createTableData;
+
+    createTableData.call(this, this.csvData);
+
+
+
+    function binarySearch(array, value) {
+        return binarySearchRecurse(array, value, 0, array.length);
+    }
+
+    function binarySearchRecurse(array, value, start, stop) {
+        if (start + 1 >= stop) {
+            return start;
+        }
+
+        let middle = Math.floor((start + stop) / 2);
+
+        if (array[middle] > value) {
+            return binarySearchRecurse(array, value, start, middle);
+        } else {
+            return binarySearchRecurse(array, value, middle, stop);
+        }
+    }
+
+    // Cell rendering functions by type
+    function createBooleanValue(initial, update) {
+        let checkbox = document.createElement('input');
+
+        checkbox.addEventListener('change', (e) => update(checkbox.checked));
+        checkbox.checked = initial;
+        checkbox.type = 'checkbox';
+
+        let container = document.createElement('div');
+
+        container.appendChild(checkbox);
+        container.className = 'cell cell-boolean';
+
+        return container;
+    }
+
+    function createDimensionValue(initial, update) {
+        let chip = document.createElement('span');
+
+        chip.dataset.color = Array.from(initial).reduce((a, c) => a * 31 + c.charCodeAt(0), 0) % 8; // Basic pseudo-hash to get deterministic color palette indices
+        chip.innerText = initial;
+
+        let container = document.createElement('div');
+
+        container.appendChild(chip);
+        container.className = 'cell cell-dimension';
+
+        return container;
+    }
+
+    function createPlainText(initial, update, rowData) {
+        let chip = document.createElement('span');
+
+
+        chip.innerText = initial;
+
+        let container = document.createElement('div');
+
+        container.appendChild(chip);
+        container.className = 'cell cell-text cell-col-' + rowData.col + " " + " cell-row-" + rowData.row;
+
+        return container;
+    }
+
+    function createPlainValue(initial, update) {
+        let container = document.createElement('div');
+
+        container.className = 'cell cell-plain';
+
+        function createDisplay(value) {
+            let element = document.createElement('span');
+
+            element.innerText = value;
+            element.addEventListener('dblclick', () => replaceWith(createInput(value)));
+
+            return element;
+        }
+
+        function createInput(value) {
+            let element = document.createElement('input');
+
+            element.value = value;
+            element.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter' || e.key === 'Escape') {
+                    if (e.key === 'Enter') {
+                        update(element.value);
+                    }
+
+                    replaceWith(createDisplay(element.value));
+
+                    return false;
+                }
+            });
+
+            return element;
+        }
+
+        function replaceWith(element) {
+            if (container.firstElementChild) {
+                container.removeChild(container.firstElementChild);
+            }
+
+            container.appendChild(element);
+        }
+
+        replaceWith(createDisplay(initial));
+
+        return container;
+    }
+
+  
+
+    // Pivot table definition
+    function pivotCreate(view, grid, table) {
+
+        // Initialize binary search arrays with pivot top-left corner locations
+        let xOffsets = [];
+        let x = 0;
+        let yOffsets = [];
+        let y = 0;
+
+        for (let i = 0; i < table.pivot1.length; ++i) {
+            xOffsets[i] = x;
+            x += table.pivot1[i].width;
+        }
+
+        for (let i = 0; i < table.pivot2.length; ++i) {
+            yOffsets[i] = y;
+            y += table.pivot2[i].height;
+        }
+
+
+        // Clear and resize grid
+        for (let child = grid.lastElementChild; child; child = grid.lastElementChild) {
+            grid.removeChild(child);
+        }
+
+        grid.style.width = table.pivot1.reduce((a, p) => a + p.width, 0) + "px";
+        grid.style.height = table.pivot2.reduce((a, p) => a + p.height, 0) + "px";
+
+        // Create cache and run first rendering
+        let pivot = {
+            cellCache: {},
+            xOffsets: xOffsets,
+            yOffsets: yOffsets
+        };
+
+        console.info(_self);
+
+        pivotRender(pivot, view, grid, table);
+
+
+        return () => pivotRender(pivot, view, grid, table);
+    }
+
+    this.pivotCreate = pivotCreate;
+
+    function pivotRender(pivot, view, grid, table) {
+
+        let iStart = binarySearch(pivot.xOffsets, view.scrollLeft);
+        let jStart = binarySearch(pivot.yOffsets, view.scrollTop);
+
+        if (iStart === undefined || jStart === undefined) {
+            return;
+        }
+
+        let cellCacheCurrent = pivot.cellCache;
+        let cellCacheNext = {};
+        let data = table.data;
+        let iStop = table.pivot1.length;
+        let jStop = table.pivot2.length;
+        let xStart = pivot.xOffsets[iStart];
+        let xStop = view.scrollLeft + view.clientWidth;
+        let yStart = pivot.yOffsets[jStart];
+        let yStop = view.scrollTop + view.clientHeight;
+
+        for (let j = jStart, y = yStart; j < jStop && y < yStop; y += table.pivot2[j].height, j += 1) {
+            for (let i = iStart, x = xStart; i < iStop && x < xStop; x += table.pivot1[i].width, i += 1) {
+                let index = i + j * iStop;
+
+
+
+                let value = data[index].value;
+                let cell;
+
+                if (cellCacheCurrent[index]) {
+                    cell = cellCacheCurrent[index];
+
+                    delete cellCacheCurrent[index];
+                }
+                else {
+                    cell = document.createElement('div')
+
+                    cell.appendChild(data[index].constructor(value, (v) => data[index].value = v, data[index]));
+                    cell.style.left = x + "px";
+                    cell.style.top = y + "px";
+                    cell.style.height = table.pivot2[j].height + 'px';
+                    cell.style.width = table.pivot1[i].width + 'px';
+                    cell.setAttribute("row", data[index].row)
+                    cell.setAttribute("col", data[index].col)
     
 
-        //重新加载表格数据
-        virtualizedTable.prototype.reloadData = function (csvData) {
-            this.createTableData(csvData);
-            this.pivotCreate(this.pivotViewEle,this.pivotGridEle,this.pivotData);
+                    if (_self.selectCol.length > 0) {
+
+                        if (_self.selectCol.indexOf(data[index].col) > -1) {
+
+                            cell.classList.add("select-col");
+
+                            cell.classList.add("select-col-" + _self.selectCol.indexOf(data[index].col)%2);
+                        }
+                    }
+                
+                    if (_self.selectRow.length > 0) {
+
+                     
+
+                        for (var k = 0; k < _self.selectRow.length; k++) {
+
+                            var rang = _self.selectRow[k];
+
+                            if (rang.length == 2) {
+
+                                if (data[index].row * 1 >= rang[0] && data[index].row * 1 <= rang[1]) {
+
+
+                                    cell.classList.add("select-row");
+
+                                    
+                                }
+                            }
+
+                        }
+                    }
+
+                }
+
+                cellCacheNext[index] = cell;
+
+                grid.appendChild(cell);
+            }
         }
 
+        // Remove stale elements from cache and return updated one
+        for (let index in cellCacheCurrent) {
+            grid.removeChild(cellCacheCurrent[index]);
+        }
+
+        pivot.cellCache = cellCacheNext;
+
+        resizeHead.call(this);
+
+
+    }
+
+
+    var scrollAction = { x: undefined, y: undefined };
+    var scrollDirection;
+    this.isFirstCreate = true;
+    function scrollFunc() {
+        if (typeof scrollAction.x == 'undefined') {
+            scrollAction.x = _self.pivotViewEle.scrollLeft;
+            scrollAction.y = _self.pivotViewEle.scrollTop;
+        }
+        var diffX = scrollAction.x - _self.pivotViewEle.scrollLeft;
+        var diffY = scrollAction.y - _self.pivotViewEle.scrollTop;
+        if (diffX < 0) {
+            // Scroll right
+            scrollDirection = 'right';
+        } else if (diffX > 0) {
+            // Scroll left
+            scrollDirection = 'left';
+        } else if (diffY < 0) {
+            // Scroll down
+            scrollDirection = 'down';
+        } else if (diffY > 0) {
+            // Scroll up
+            scrollDirection = 'up';
+        } else {
+            // First scroll event
+        }
+        scrollAction.x = _self.pivotViewEle.scrollLeft;
+        scrollAction.y = _self.pivotViewEle.scrollTop;
+    }
+
+    function createHead(headEle, table) {
+        return;
+        let left = 0;
+        var cols = [];
+        for (let index = 0; index < Math.min(table.pivot1.length, 20); index++) {
+            const element = table.pivot1[index];
+
+            cols.push(`<div style="left: ${left}px; top: 0px; height: ${_height}px;"><div class="cell" style="">${element.label}</div></div>`);
+            left += _width;
+        }
+        headEle.innerHTML = cols.join('');
+    }
+
+    function resizeHead() {
+
+
+
+        if (_self.pivotGridEle.childElementCount == 0) {
+            return;
+        }
+
+        scrollFunc();
+
+        var table = _self.pivotHeadEle;
+
+        var firstChild = _self.pivotGridEle.children[0];
+
+        var child = _self.pivotGridEle.querySelectorAll("[row='" + firstChild.getAttribute("row") + "']");
+
+        var childCol = _self.pivotGridEle.querySelectorAll("[col='" + firstChild.getAttribute("col") + "']");
+
+
+        //--------左右时,生成表头------
+        if ((scrollDirection == 'left' || scrollDirection == 'right') || _self.isFirstCreate) {
+
+            table.innerHTML = "";
+
+            for (let index = 0; index < child.length; index++) {
+
+                const element = child[index];
+
+                var col = element.getAttribute("col");
+
+                var cloned = element.cloneNode(false);
+
+                var ch = document.createElement("div");
+
+                ch.className = 'cell cell-text';
+
+                ch.innerText = _self.pivotData.pivot1[col].label;
+
+                cloned.appendChild(ch);
+
+                cloned.style.top = "0px";
+
+                cloned.setAttribute("row", "0");
+
+                cloned.classList.remove("select-row");
+
+                table.appendChild(cloned);
+
+            }
+
+        }
+        if ((scrollDirection == 'up' || scrollDirection == 'down') || _self.isFirstCreate) {
+
+
+            //--------上下时,生成行号
+
+
+            var rowBox = _self.rownumberEle;
+
+            rowBox.innerHTML = "";
+
+            //序号
+            for (let index = 0; index < childCol.length; index++) {
+
+                const element = childCol[index];
+
+                var col = element.getAttribute("col");
+                var row = element.getAttribute("row");
+
+
+                var cloned = element.cloneNode(false);
+
+                var ch = document.createElement("div");
+
+                ch.className = 'rownum rownum-text';
+
+                ch.innerText = row;
+
+                cloned.appendChild(ch);
+
+                cloned.style.left = "0px";
+
+                cloned.style.width = "100%";
+
+                cloned.className = "";
+
+                cloned.style.top = (parseFloat(element.style.top) - _self.pivotViewEle.scrollTop) + "px";
+
+                cloned.setAttribute("col", "");
+
+                cloned.setAttribute("className", "");
+
+                rowBox.appendChild(cloned);
+            }
+        }
+
+        isFirstCreate = false;
+    }
+
+
+    createHead(this.pivotHeadEle, this.pivotData);
+
+
+    let render = pivotCreate(this.pivotViewEle, this.pivotGridEle, this.pivotData);
+
+    this.render = render;
+
+    this.pivotViewEle.addEventListener('scroll', () => _self.render());
+    window.addEventListener('resize', () => {
+
+        _self.render();
+        createHead(_self.pivotHeadEle, _self.pivotData);
+        resizeHead();
+    });
+
+    this.pivotViewEle.addEventListener('scroll', () => {
+
+        var scrollTopValue = _self.pivotViewEle.scrollTop;
+
+        _self.pivotHeadEle.style.top = scrollTopValue + "px";
+
+        // resizeHead();
+
+        // debounce(resizeHead,1000);
+    });
+
+    this.resizeHead = resizeHead;
+
+    function debounce(fn, wait) {
+        let timer = null;
+        return function () {
+            // wait秒内再次触发事件，只要判断timer存在，则清除上一个定时器，重新创建定时器并计算时间
+            if (timer) clearTimeout(timer)
+
+            // 判断是不是第一次点击，timer是null的时候是第一次；判断timer === null，用==也可以
+            // 但是因为undefined  == null;一般遇到null的判断，都会把null改成boolean的判断；
+            let firstClick = !timer;
+
+            //第一次触发事件 或者 最后一次事件触发过wait秒后再次触发事件
+            if (firsrClick) fn.apply(this, arguments);
+
+            timer = setTimeout(() => {
+                timer = null;
+            }, wait)
+        }
+    }
+
+
+}
+
+
+//重新加载表格数据
+virtualizedTable.prototype.reloadData = function (csvData) {
+  
+    this.createTableData(csvData);
+
+    this.render = this.pivotCreate(this.pivotViewEle, this.pivotGridEle, this.pivotData);
+
+
+    this.isFirstCreate = true;
+
+
+    this.resizeHead();
+}
+
+
+virtualizedTable.prototype.setSelectCol = function (cols) {
+
+    this.selectCol = cols;
+
+    var selectItems = this.container.querySelectorAll(".select-col");
+
+    for (var i = 0; i < selectItems.length; i++) {
+        selectItems[i].classList.remove("select-col");
+        selectItems[i].classList.remove("select-col-1");
+        selectItems[i].classList.remove("select-col-0");
+    }
+
+    for (var i = 0; i < cols.length; i++) {
+
+        var colItems = this.container.querySelectorAll('[col="' + cols[i] + '"]');
+
+        for (var j = 0; j < colItems.length; j++) {
+
+            if (colItems[j].classList.contains("select-col") == false) {
+
+                colItems[j].classList.add("select-col");
+                colItems[j].classList.add("select-col-" + i % 2);
+            }
+          
+
+            
+        }
+      
+    }
+}
+virtualizedTable.prototype.setSelectRow = function (rows) {
+ 
+
+    this.selectRow = rows;
+
+    var selectItems = this.container.querySelectorAll(".select-row");
+
+    for (var i = 0; i < selectItems.length; i++) {
+        selectItems[i].classList.remove("select-row");
+    }
+
+    for (var i = 0; i < rows.length; i++) {
+
+
+        var rowItems = this.container.querySelectorAll('[row]');
+
+        var rowRang = rows[i];
+
+        for (var k = 0; k < rowItems.length; k++) {
+
+            var row = rowItems[k].getAttribute("row");
+
+            if (row != "") {
+
+
+                if (row * 1 >= rowRang[0] && row * 1 <= rowRang[1]) {
+
+                    rowItems[k].classList.add("select-row");
+
+                }
+
+            }
+
+        }
+
+        
+    }
+
+
+}
     </script>
 </head>
 <body>
